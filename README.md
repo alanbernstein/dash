@@ -1,0 +1,7 @@
+* oven.html - front end
+* dash_server.py - webserver backend
+* dash_daemon.py - runs on local machine to listen for dash button and notify webserver
+
+* dash_button.py - junk
+* dash_listen.py - junk
+* dash_scan.py - junk

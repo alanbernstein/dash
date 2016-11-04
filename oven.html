@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type=text/css>
+.debug {display:none}
+.label {display:inline-block; width:4em; text-align: left}
+.title {text-decoration: underline}
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+
+// helper functions
+function HMSToString(h,m,s) {
+    return h + ":" + (m<10?'0'+m:m) + ":" + (s<10?'0'+s:s)
+}
+
+function secondsToHMS(seconds) {
+    // convert a time difference in seconds to HH:MM:SS format
+    hours = Math.floor(seconds/60/60)
+    mins = Math.floor((seconds - 60*60*hours)/60)
+    secs = seconds - 60*60*hours - 60*mins
+
+    return HMSToString(hours, mins, secs)
+}
+
+function epochToHMS(epoch) {
+    // convert epoch timestamp to HH:MM:SS format (ignore date)
+    var date = new Date(epoch*1000);
+    return HMSToString(date.getHours(), date.getMinutes(), date.getSeconds())
+}
+
+
+// get data on page load
+$(document).ready(function(){
+    start_epoch = Math.floor((new Date).getTime()/1000)
+    start_human = epochToHMS(start_epoch)
+    $("#start-epoch").html(start_epoch)
+    $("#start-human").html(start_human)
+    $("#last-epoch").load("cgi-bin/dash.py?last=oven", function(resp){
+        last_epoch = $("#last-epoch").text()
+        last_human = epochToHMS(resp)
+        $("#last-human").html(last_human)
+    });
+
+});
+
+
+// update timer fields once per second
+function updateTimer() {
+    now_epoch = Math.floor((new Date).getTime()/1000)
+    now_human = epochToHMS(now_epoch)
+    last_epoch = $("#last-epoch").text()
+    elapsed_sec = Math.floor(now_epoch - last_epoch)
+
+    elapsed_human = secondsToHMS(elapsed_sec)
+    
+    $("#now-epoch").html(now_epoch)
+    $("#now-human").html(now_human)
+    $("#elapsed-seconds").html(elapsed_sec)
+    $("#elapsed-human").html(elapsed_human)
+
+    setTimeout("updateTimer()", 1000);
+}
+updateTimer()
+
+</script>
+</head>
+<body>
+
+<div class=content style="font-size:10vw; font-family: arial, sans-serif; width=80%; margin-left: 10%;">
+<span class=title>smart oven timer</span><br><br>
+<span class=label>last: </span> <span id="last-human"></span><span class=debug> (<span id="last-epoch"></span>)</span><br>
+<span class=debug><span class=label>page load:</span> <span id="start-human"></span> (<span id="start-epoch"></span>)<br></span>
+<span class=label>now: </span> <span id="now-human"></span><span class=debug> (<span id="now-epoch"></span>)</span><br>
+<span class=label>elapsed: </span> <span id="elapsed-human"></span><span class=debug> (<span id="elapsed-seconds"></span>)</span><br>
+</div>
+
+</body>
+</html>
